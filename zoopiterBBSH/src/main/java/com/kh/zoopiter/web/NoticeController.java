@@ -33,28 +33,12 @@ import java.util.Optional;
 public class NoticeController {
 
   private final BBSHSVC BBSHSVC;
-  //  private final CodeDAO codeDAO;
   private final UploadFileSVC uploadFileSVC;
 
   @Autowired
   @Qualifier("fc10") //동일한 타입의 객체가 여러개있을때 빈이름을 명시적으로 지정해서 주입받을때
   private FindCriteria fc;
-//
-//  //게시판 코드,디코드 가져오기
-//  @ModelAttribute("classifier")
-//  public List<Code> classifier(){
-//    return codeDAO.findCodesByPcodeId("B0101");
-//  }
-//
-//  @ModelAttribute("bbsTitle")
-//  public Map<String,String> bbsTitle(){
-//    List<Code> codes = codeDAO.findCodesByPcodeId("B0101");
-//    Map<String,String> btitle = new HashMap<>();
-//    for (Code code : codes) {
-//      btitle.put(code.getCodeId(), code.getDecode());
-//    }
-//    return btitle;
-//  }
+
 
   // 등록양식
   @GetMapping("/add")
@@ -105,11 +89,7 @@ public class NoticeController {
     bbsh.setBhContent(saveForm.getBhContent());
     bbsh.setPetType(saveForm.getPetType());
     bbsh.setBhStar(saveForm.getBhStar());
-//    bbsh.setBhAttach(saveForm.getAttachFile());
-//    BBSH.setAuthor(saveForm.getAuthor());
-//    BBSH.setHit(saveForm.getHit());
-//    BBSH.setCDate(saveForm.getCDate());
-//    BBSH.setUDate(saveForm.getUDate());
+
 
     // 파일첨부에 대한 메타정보추출 & 물리파일저장
 //    UploadFile attachFile = uploadFileSVC.convert(saveForm.getAttachFile(), AttachFileType.F010201);
@@ -164,10 +144,11 @@ public class NoticeController {
     BBSH bbsh = findedNotice.orElseThrow();
 
     UpdateForm updateForm = new UpdateForm();
-    updateForm.setBhStar(bbsh.getBhStar());
-    updateForm.setPetType(bbsh.getPetType());
-    updateForm.setBhTitle(bbsh.getBhTitle());
-    updateForm.setBhContent(bbsh.getBhContent());
+//    updateForm.setBhStar(bbsh.getBhStar());
+//    updateForm.setPetType(bbsh.getPetType());
+//    updateForm.setBhTitle(bbsh.getBhTitle());
+//    updateForm.setBhContent(bbsh.getBhContent());
+    BeanUtils.copyProperties(bbsh,updateForm);
 
     model.addAttribute("updateForm", updateForm);
 
@@ -196,17 +177,33 @@ public class NoticeController {
       return "BBSH/updateForm";
     }
 
+//    // 정상처리
+//    BBSH bbsh = new BBSH();
+//    bbsh.setBbshId(bbshId);
+//    bbsh.setBhTitle(updateForm.getBhTitle());
+//    bbsh.setBhContent(updateForm.getBhContent());
+//    bbsh.setBhStar(updateForm.getBhStar());
+//    bbsh.setPetType(updateForm.getPetType());
+//
+//    BBSHSVC.update(bbshId, bbsh);
+//
+//    redirectAttributes.addAttribute("bbshId", bbshId);
+
     // 정상처리
     BBSH bbsh = new BBSH();
-    bbsh.setBbshId(bbshId);
-    bbsh.setBhTitle(updateForm.getBhTitle());
-    bbsh.setBhContent(updateForm.getBhContent());
-    bbsh.setBhStar(updateForm.getBhStar());
-    bbsh.setPetType(updateForm.getPetType());
-
+    BeanUtils.copyProperties(updateForm,bbsh);
     BBSHSVC.update(bbshId, bbsh);
 
-    redirectAttributes.addAttribute("bbshId", bbshId);
+    // 파일첨부
+    List<UploadFile> imageFiles = uploadFileSVC.convert(updateForm.getImageFiles(),AttachFileType.F010202);
+
+    if(updateForm.getImageFiles().size() == 0){
+      BBSHSVC.update(bbshId, bbsh);
+    }else{
+      BBSHSVC.update(bbshId, bbsh, imageFiles);
+    }
+
+    redirectAttributes.addAttribute("bbshId",bbshId);
 
     return "redirect:/BBSH/{bbshId}/detail";
   }
@@ -241,6 +238,77 @@ public class NoticeController {
 //    }
 //    return "BBSH/all";
 //  }
+
+  // 페이징 구현(목록)
+  // searchType: 조회순, 최신순 category: 동물태그
+//  @GetMapping({"/list",
+//      "/list/{reqPage}",
+//      "/list/{reqPage}//",
+//      "/list/{reqPage}/{searchType}/"})
+//  public String listAndReqPage(
+//      @PathVariable(required = false) Optional<Integer> reqPage,
+//      @PathVariable(required = false) Optional<String> searchType,
+//      @RequestParam(required = false) Optional<String> category,
+//      Model model) {
+//    log.info("/list 요청됨{},{},{},{}",reqPage,searchType,category);
+//
+//    String cate = getCategory(category);    // 펫태그 배열
+//
+//    //FindCriteria 값 설정
+//    fc.getRc().setReqPage(reqPage.orElse(1)); //요청페이지, 요청없으면 1
+//    fc.setSearchType(searchType.orElse(""));  //검색유형(조회수,최신순)
+//
+//    List<BBSH> bbshList = null;
+//
+//    // 게시물 목록 전체
+//    if(!category.isPresent()){
+//      String[] arr = {};
+//
+//      if(searchType.isPresent()){ //검색어 있음(필터-최신,조회)
+//        BBSHFilter filterCondition = new BBSHFilter(
+//            arr, fc.getRc().getStartRec(), fc.getRc().getEndRec(),
+//            searchType.get()
+//        );
+//
+//        fc.setTotalRec(BBSHSVC.totalCount(filterCondition));
+//        fc.setSearchType(searchType.get());
+//        bbshList = BBSHSVC.findByFilter(filterCondition);
+//
+//      } else if (category.isPresent()) { //검색어 있음(펫태그)
+//        arr = category.get();
+//
+//        BBSHFilter filterCondition2 = new BBSHFilter(
+//            arr, fc.getRc().getStartRec(), fc.getRc().getEndRec(),
+//            searchType.get()
+//        );
+//
+//        fc.setTotalRec(bbscSVC.totalCount(filterCondition2));
+//        fc.setCategory(category.get());
+//        bbscList = bbscSVC.findByPetType(filterCondition2);
+//
+//      }else{  //검색어 없음
+//        // 총레코드수
+//        fc.setTotalRec(bbscSVC.totalCount());
+//        log.info("startRec={},endRec={}",fc.getRc().getStartRec(),fc.getRc().getEndRec());
+//        bbscList = bbscSVC.findAll(fc.getRc().getStartRec(),fc.getRc().getEndRec());
+//      }
+//    }
+//
+//    List<BbscListForm> partOfList = new ArrayList<>();
+//    for(Bbsc bbsc : bbscList){
+//      BbscListForm listForm = new BbscListForm();
+//      BeanUtils.copyProperties(bbsc, listForm);
+//      partOfList.add(listForm);
+//    }
+//
+//    model.addAttribute("list",partOfList);
+//    model.addAttribute("fc",fc);
+//    model.addAttribute("petTag",cate);
+//
+//    return "BBSH/list";
+//  }
+//
+//
 //
 //    //쿼리스트링 카테고리 읽기, 없으면 ""반환
 //    private String getCategory(Optional<String> category) {
@@ -258,18 +326,29 @@ public class NoticeController {
 
     fc.getRc().setReqPage(reqPage.orElse(1));
     fc.setTotalRec(BBSHSVC.totalCount());
-    log.info("BBSHSVC.totalCount()=", BBSHSVC.totalCount());
+    log.info("fc={}",fc);
+    log.info("fc.getTotalRec={},startPage={},endPage={},fc.reqPage={},fc.startRec={},fc.endRed={}",
+        fc.getTotalRec(),fc.getStartPage(),fc.getEndPage(),fc.getRc().getReqPage(),fc.getRc().getEndRec());
     List<BBSH> bbshListsPaging = BBSHSVC.findAllPaging(fc.getRc().getStartRec(), fc.getRc().getEndRec());
-    log.info("bbshListsPaging={}", bbshListsPaging);
+    log.info("bbshListsPaging={},{}", bbshListsPaging.size(),bbshListsPaging);
+
 
     List<ListForm> partOfList = new ArrayList<>();
     for (BBSH bbsh : bbshListsPaging) {
       ListForm listForm = new ListForm();
-      BeanUtils.copyProperties(bbsh, listForm);
+//      BeanUtils.copyProperties(bbsh, listForm);
+      listForm.setTId(bbsh.getBbshId());
+      listForm.setBcategory(bbsh.getPetType());
+      listForm.setTitle(bbsh.getBhTitle());
+      listForm.setBcontent(bbsh.getBhContent());
+      listForm.setNickname(bbsh.getUserNick());
+      listForm.setCDate(bbsh.getCDate());
+      listForm.setUDate(bbsh.getBhUdate());
+      listForm.setHit(bbsh.getBhHit());
       partOfList.add(listForm);
     }
     log.info("partOfList={}", partOfList);
-    model.addAttribute("bbshList", partOfList);
+    model.addAttribute("bbshLists", partOfList);
     model.addAttribute("fc", fc);
 
     return "BBSH/all";

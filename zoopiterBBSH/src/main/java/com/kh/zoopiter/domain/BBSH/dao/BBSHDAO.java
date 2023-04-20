@@ -21,17 +21,24 @@ public interface BBSHDAO {
 
   // 목록
   List<BBSH> findAll();
-  List<BBSH>  findAll(String category);
+//  List<BBSH>  findAll(String category);
 
   List<BBSH>  findAllPaging(int startRec, int endRec);
-  List<BBSH>  findAll(String category,int startRec, int endRec);
+  List<BBSH>  findAll(BBSHFilter filterCondition, int startRec, int endRec);
 
   /**
    * 검색
    * @param filterCondition 분류,시작레코드번호,종료레코드번호,검색유형,검색어
    * @return
    */
-  List<BBSH>  findAll(BBSHFilterCondition filterCondition);
+  List<BBSH> findByPetType(BBSHFilter filterCondition);
+
+  /**
+   * 필터 검색
+   * @param filterCondition 조회수, 최신순, 좋아요
+   * @return
+   */
+  List<BBSH> findByFilter(BBSHFilter filterCondition);
 
 
   // 조회수
@@ -42,7 +49,7 @@ public interface BBSHDAO {
    * @return 게시글 전체건수
    */
   int totalCount();
-  int totalCount(String petType);
-  int totalCount(BBSHFilterCondition filterCondition);
+//  int totalCount(String tCategory);
+  int totalCount(BBSHFilter filterCondition);
 
 }

@@ -1,6 +1,6 @@
 package com.kh.zoopiter.domain.BBSH.svc;
 
-import com.kh.zoopiter.domain.BBSH.dao.BBSHFilterCondition;
+import com.kh.zoopiter.domain.BBSH.dao.BBSHFilter;
 import com.kh.zoopiter.domain.entity.BBSH;
 import com.kh.zoopiter.domain.entity.UploadFile;
 import com.kh.zoopiter.web.common.AttachFileType;
@@ -30,14 +30,21 @@ public interface BBSHSVC {
 
   List<BBSH> findAllPaging(int startRec, int endRec);
 
-  List<BBSH> findAll(String category,int startRec, int endRec);
+  List<BBSH> findAll(BBSHFilter filterCondition,int startRec, int endRec);
 
   /**
    * 검색
-   * @param bbshFilterCondition 분류,시작레코드번호,종료레코드번호,검색유형,검색어
+   * @param bbshFilter 분류,시작레코드번호,종료레코드번호,검색유형,검색어
    * @return
    */
-  List<BBSH>  findAll(BBSHFilterCondition bbshFilterCondition);
+  List<BBSH>  findByPetType(BBSHFilter filterCondition);
+
+  /**
+   * 필터 검색
+   * @param filterCondition 조회수, 최신순, 좋아요
+   * @return
+   */
+  List<BBSH> findByFilter(BBSHFilter filterCondition);
 
   //조회수증가
   int increaseHit(Long bbshId);
@@ -47,7 +54,7 @@ public interface BBSHSVC {
    * @return 게시글 전체건수
    */
   int totalCount();
-  int totalCount(String petType);
-  int totalCount(BBSHFilterCondition filterCondition);
+//  int totalCount(String bcategory);
+  int totalCount(BBSHFilter filterCondition);
 }
 

@@ -1,7 +1,7 @@
 package com.kh.zoopiter.domain.BBSH.svc;
 
 import com.kh.zoopiter.domain.BBSH.dao.BBSHDAO;
-import com.kh.zoopiter.domain.BBSH.dao.BBSHFilterCondition;
+import com.kh.zoopiter.domain.BBSH.dao.BBSHFilter;
 import com.kh.zoopiter.domain.common.file.svc.UploadFileSVC;
 import com.kh.zoopiter.domain.entity.BBSH;
 import com.kh.zoopiter.domain.entity.UploadFile;
@@ -32,13 +32,6 @@ public class BBSHSVCImpl implements BBSHSVC {
   @Transactional
   @Override
   public Long save(BBSH bbsh, List<UploadFile> uploadFiles) {
-//    entityManager.persist(bbsh);
-//    Long bbshId = bbsh.getBbshId();
-//    if(uploadFiles.size() > 0) {
-//      uploadFiles.stream().forEach(file -> file.setRid(bbshId));
-//      uploadFileSVC.addFiles(uploadFiles);
-//    }
-//    return bbshId;
     Long bbshId = save(bbsh);
     if(uploadFiles.size() > 0) {
       uploadFiles.stream().forEach(file-> file.setRid(bbshId));
@@ -76,7 +69,7 @@ public class BBSHSVCImpl implements BBSHSVC {
 
   @Override
   public int delete(Long bbshId, AttachFileType attachFileType) {
-    //1) 상품정보 삭제
+    // 1) 게시글 삭제
     int cnt = BBSHDAO.delete(bbshId);
 
     //2) 물리파일 삭제
@@ -100,13 +93,30 @@ public class BBSHSVCImpl implements BBSHSVC {
   }
 
   @Override
-  public List<BBSH> findAll(String category, int startRec, int endRec) {
-    return BBSHDAO.findAll(category,startRec,endRec);
+  public List<BBSH> findAll(BBSHFilter filterCondition, int startRec, int endRec) {
+    return BBSHDAO.findAll(filterCondition,startRec,endRec);
   }
 
+  /**
+   * 검색
+   *
+   * @param filterCondition 펫태그(강아지,고양이,소동물,기타)
+   * @return
+   */
   @Override
-  public List<BBSH> findAll(BBSHFilterCondition filterCondition) {
-    return BBSHDAO.findAll(filterCondition);
+  public List<BBSH> findByPetType(BBSHFilter filterCondition) {
+    return BBSHDAO.findByPetType(filterCondition);
+  }
+
+  /**
+   * 필터 검색
+   *
+   * @param filterCondition 조회수, 최신순, 좋아요
+   * @return
+   */
+  @Override
+  public List<BBSH> findByFilter(BBSHFilter filterCondition) {
+    return BBSHDAO.findByFilter(filterCondition);
   }
 
   @Override
@@ -118,13 +128,13 @@ public class BBSHSVCImpl implements BBSHSVC {
     return BBSHDAO.totalCount();
   }
 
-  @Override
-  public int totalCount(String petType) {
-    return BBSHDAO.totalCount(petType);
-  }
+//  @Override
+//  public int totalCount(String bcategory) {
+//    return BBSHDAO.totalCount(bcategory);
+//  }
 
   @Override
-  public int totalCount(BBSHFilterCondition filterCondition) {
+  public int totalCount(BBSHFilter filterCondition) {
     return BBSHDAO.totalCount(filterCondition);
   }
 }

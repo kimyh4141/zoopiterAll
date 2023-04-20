@@ -356,8 +356,8 @@
       <!-- 게시글 영역 -->
       <div class="main-nick">
         <!-- 게시글 -->
-        <div th:each="BBSH : ${bbshLists}">
-          <button type="button" id="btnFindAll" style="border : none"; th:onclick="|location.href='@{/BBSH/{id}/detail(id=${BBSH.bbshId})}'|">
+        <th:block th:each="BBSH : ${bbshLists}">
+          <button type="button" id="btnFindAll" style="border : none"; th:onclick="|location.href='@{/BBSH/{tId}/detail(tId=${BBSH.tId})}'|">
         <div class="post" >
           <div class="info">
             <div class="pro">
@@ -367,20 +367,20 @@
               </div>
               <div class="name">
                 <div>작성자명</div>
-                <div id="clock" th:text="${BBSH.bhUdate}">
+                <div id="clock" th:text="${BBSH.uDate}">
 
                 </div>
               </div>
             </div>
             <div class="sub">
               <div class="num">
-                <div class="num-cnt" th:text="${BBSH.bhHit}">
+                <div class="num-cnt" th:text="${BBSH.hit}">
                   <div class="num-cnt" >조회수
                     <span th:text="*{bhHit}"></span>
                   </div>
                 </div>
               </div>
-              <div class="tag" th:text="${BBSH.petType}"></div>
+              <div class="tag" th:text="${BBSH.bcategory}"></div>
             </div>
           </div>
           <div class="preview">
@@ -394,9 +394,9 @@
               <div class="hos">슬기로운 동물병원</div>
               <div>
                   <div>
-                    <a href="" th:href="@{/BBSH/{bbshId}/detail(bbshId=${BBSH.bbshId})}"  th:text="${BBSH.bhTitle}"></a>
+                    <a href="" th:href="@{/BBSH/{bbshId}/detail(bbshId=${BBSH.tId})}"  th:text="${BBSH.title}"></a>
                   </div>
-                  <td th:text="${BBSH.bhContent}"></td>
+                  <td th:text="${BBSH.bcontent}"></td>
               </div>
             </div>
           </div>
@@ -404,7 +404,7 @@
           </button>
     </th:block>
 
-        </div>
+        </th:block>
       </div>
       <!-- 게시판 페이지 -->
       <div class="page">

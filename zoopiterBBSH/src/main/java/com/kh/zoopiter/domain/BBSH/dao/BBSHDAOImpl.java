@@ -6,15 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.*;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.thymeleaf.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -135,32 +130,32 @@ public class BBSHDAOImpl implements BBSHDAO {
     return list;
   }
 
-  // 카테고리별 목록
-  @Override
-  public List<BBSH> findAll(String category) {
-    StringBuffer sb = new StringBuffer();
-    sb.append("select ");
-    sb.append("       BH_TITLE ");
-    sb.append("       BH_CONTENT ");
-    sb.append("       PET_TYPE   ");
-    sb.append("       BH_HIT  ");
-    sb.append("       USER_NICK  ");
-    sb.append("       BH_CDATE  ");
-    sb.append("       BH_UDATE  ");
-    sb.append("from ");
-    sb.append(" BBSH  ");
-    sb.append("where PET_TYPE = ? ");
-    sb.append("Order by ");
-    sb.append("  BH_CDATE DESC"); // 예시로 BH_CDATE 기준으로 내림차순 정렬
-
-
-    List<BBSH> list = template.query(
-        sb.toString(),
-        BeanPropertyRowMapper.newInstance(BBSH.class)  // 레코드 컬럼과 자바객체 멤버필드가 동일한 이름일경우, camelcase지원
-    );
-
-    return list;
-  }
+//  // 카테고리별 목록
+//  @Override
+//  public List<BBSH> findAll(String category) {
+//    StringBuffer sb = new StringBuffer();
+//    sb.append("select ");
+//    sb.append("       BH_TITLE ");
+//    sb.append("       BH_CONTENT ");
+//    sb.append("       PET_TYPE   ");
+//    sb.append("       BH_HIT  ");
+//    sb.append("       USER_NICK  ");
+//    sb.append("       BH_CDATE  ");
+//    sb.append("       BH_UDATE  ");
+//    sb.append("from ");
+//    sb.append(" BBSH  ");
+//    sb.append("where PET_TYPE = ? ");
+//    sb.append("Order by ");
+//    sb.append("  BH_CDATE DESC"); // 예시로 BH_CDATE 기준으로 내림차순 정렬
+//
+//
+//    List<BBSH> list = template.query(
+//        sb.toString(),
+//        BeanPropertyRowMapper.newInstance(BBSH.class)  // 레코드 컬럼과 자바객체 멤버필드가 동일한 이름일경우, camelcase지원
+//    );
+//
+//    return list;
+//  }
 
   @Override
   public List<BBSH> findAllPaging(int startRec, int endRec) {
@@ -188,81 +183,66 @@ public class BBSHDAOImpl implements BBSHDAO {
   }
 
   @Override
-  public List<BBSH> findAll(String category, int startRec, int endRec) {
+  public List<BBSH> findAll(BBSHFilter filterCondition, int startRec, int endRec) {
     StringBuffer sb = new StringBuffer();
     sb.append("select t1.* ");
     sb.append("from( ");
     sb.append("    select ");
-    sb.append("      ROW_NUMBER() OVER (ORDER BY bbs_id DESC) no, ");
-//    sb.append("    ROW_NUMBER() OVER (ORDER BY PET_TYPE DESC , step ASC) no, ");
-//    sb.append("       BH_TITLE ");
-//    sb.append("       BH_CONTENT ");
-//    sb.append("       PET_TYPE   ");
-//    sb.append("       BH_HIT  ");
-//    sb.append("       USER_NICK  ");
-//    sb.append("       BH_CDATE  ");
-//    sb.append("       BH_UDATE  ");
+    sb.append("    ROW_NUMBER() OVER (ORDER BY PET_TYPE DESC , step ASC) no, ");
+    sb.append("       BBSH_ID, ");
+    sb.append("       BH_TITLE, ");
+    sb.append("       BH_CONTENT, ");
+    sb.append("       PET_TYPE,   ");
+    sb.append("       BH_HIT,  ");
+    sb.append("       USER_NICK,  ");
+    sb.append("       BH_CDATE  ");
+    sb.append("       BH_UDATE  ");
     sb.append("     FROM BBSH  ");
-    sb.append("   where PET_TYPE = ? ) t1  ");
-    sb.append("where t1.no between ? and ? ");
+    sb.append("   where PET_TYPE in ( ");
+    sb = dynamicQuery(filterCondition,sb);
+    sb.append( ") t1");
+    sb.append("where t1.no between :startRc and :endRc ");
 
-    JdbcTemplate jdbcTemplate = null;
-    List<BBSH> list = jdbcTemplate.query(
-        sb.toString(),
-        new BeanPropertyRowMapper<>(BBSH.class),
-        category, startRec, endRec
-    );
+    SqlParameterSource param = new MapSqlParameterSource()
+        .addValue("startRc", startRec)
+        .addValue("endRc", endRec);
+
+    List<BBSH> list = template.query(sb.toString(), param, new BeanPropertyRowMapper<>(BBSH.class));
     return list;
   }
 
   @Override
-  public List<BBSH> findAll(BBSHFilterCondition filterCondition) {
-    StringBuffer sb = new StringBuffer();
-    sb.append("select t1.* ");
-    sb.append("from( ");
-    sb.append("     SELECT ROW_NUMBER() OVER (ORDER BY PET_TYPE DESC, step ASC) no, ");
-    sb.append("       BH_TITLE ");
-    sb.append("       BH_CONTENT ");
-    sb.append("       PET_TYPE   ");
-    sb.append("       BH_HIT  ");
-    sb.append("       USER_NICK  ");
-    sb.append("       BH_CDATE  ");
-    sb.append("       BH_UDATE  ");
-    sb.append("     FROM BBSH ");
-    sb.append("   WHERE ");
-
-    JdbcTemplate jdbcTemplate = null;
-    //분류
-    sb = dynamicQuery(filterCondition, sb);
-
-    sb.append(") t1 ");
-    sb.append("where t1.no between ? and ? ");
-
+  public List<BBSH> findByPetType(BBSHFilter filterCondition) {
+    StringBuffer sql = new StringBuffer();
+    sql.append("select * from BBSH where PET_TYPE in ( ");
+    sql = dynamicQuery(filterCondition, sql);
 
     List<BBSH> list = null;
 
-    //게시판 전체
-    if(StringUtils.isEmpty(filterCondition.getCategory())){
-      list = jdbcTemplate.query(
-          sb.toString(),
-          new BeanPropertyRowMapper<>(BBSH.class),
-          filterCondition.getStartRec(),
-          filterCondition.getEndRec()
-      );
-      //게시판 분류
-    }else{
-      list = jdbcTemplate.query(
-          sb.toString(),
-          new BeanPropertyRowMapper<>(BBSH.class),
-          filterCondition.getCategory(),
-          filterCondition.getStartRec(),
-          filterCondition.getEndRec()
-      );
-    }
+    list =template.query(sql.toString(), new BeanPropertyRowMapper<>(BBSH.class));
+
 
     return list;
   }
 
+  /**
+   * 필터 검색
+   *
+   * @param filterCondition 조회수, 최신순, 좋아요
+   * @return
+   */
+  @Override
+  public List<BBSH> findByFilter(BBSHFilter filterCondition) {
+    StringBuffer sql = new StringBuffer();
+    sql.append("select * from BBSH order by ");
+    sql = dynamicQuery(filterCondition, sql);
+
+    List<BBSH> list = null;
+
+    list = template.query(sql.toString(),new BeanPropertyRowMapper<>(BBSH.class));
+
+    return list;
+  }
 
 
 //
@@ -309,66 +289,62 @@ public class BBSHDAOImpl implements BBSHDAO {
     return cnt;
   }
 
+//  @Override
+//  public int totalCount(String bcategory) {
+//    String sql = "select count(*) from trouble_board where t_category = :tcategory";
+//    MapSqlParameterSource params = new MapSqlParameterSource();
+//    params.addValue("tcategory", bcategory);
+//    Integer cnt = template.queryForObject(sql, params, Integer.class);
+//
+//    return cnt;
+//  }
+
   @Override
-  public int totalCount(String petType) {
-    String sql = "select count(*) from trouble_board where t_category = :tcategory";
-    MapSqlParameterSource params = new MapSqlParameterSource();
-    params.addValue("tcategory", petType);
-    Integer cnt = template.queryForObject(sql, params, Integer.class);
+  public int totalCount(BBSHFilter filterCondition) {
+    StringBuffer sql = new StringBuffer();
+    sql.append("select count(*) from BBSH where PET_TYPE in ( ");
+    sql = dynamicQuery(filterCondition, sql);
+    SqlParameterSource param = new EmptySqlParameterSource();
+    Integer cntOfFindedBypetType = template.queryForObject(sql.toString(), param, Integer.class);
 
-    return cnt;
+    return cntOfFindedBypetType;
   }
 
-  @Override
-  public int totalCount(BBSHFilterCondition bbshFilterCondition) {
-    StringBuilder sql = new StringBuilder();
-    sql.append("select count(*) from trouble_board ");
-    if(!StringUtils.isEmpty(bbshFilterCondition.getCategory())) {
-      sql.append("where bcategory = :category ");
+  private StringBuffer dynamicQuery(BBSHFilter filterCondition, StringBuffer sql) {
+    String[] petTypes = filterCondition.getCategory();
+    if (petTypes.length > 0) {
+      for (int i = 0; i < petTypes.length; i++) {
+        sql.append(" '" + petTypes[i] + "' ");
+        if (i != petTypes.length - 1) {
+          sql.append(", ");
+        }
+      }
+      sql.append(" ) ");
     }
-    if(!StringUtils.isEmpty(bbshFilterCondition.getSearchType())) {
-      sql.append("and "+bbshFilterCondition.getSearchType()+" like :keyword ");
+
+    String searchType = filterCondition.getSearchType();
+    if (searchType == "bhHit") {
+      sql.append("BH_HIT desc ");
+    } else if (searchType == "bhUdate") {
+      sql.append("BH_UDATE desc ");
     }
-
-    SqlParameterSource paramMap = new MapSqlParameterSource()
-        .addValue("category", bbshFilterCondition.getCategory())
-        .addValue("keyword", "%"+bbshFilterCondition.getKeyword()+"%");
-
-    Integer cnt = template.queryForObject(sql.toString(), paramMap, Integer.class);
-
-    return cnt;
+    return sql;
   }
 
-  private StringBuffer dynamicQuery(BBSHFilterCondition filterCondition, StringBuffer sb) {
-    //분류
-    if(StringUtils.isEmpty(filterCondition.getCategory())){
-
-    }else{
-      sb.append("       PET_TYPE = ? ");
-    }
-
-    //분류,검색유형,검색어 존재
-    if(!StringUtils.isEmpty(filterCondition.getCategory()) &&
-        !StringUtils.isEmpty(filterCondition.getSearchType()) &&
-        !StringUtils.isEmpty(filterCondition.getKeyword())){
-
-      sb.append(" AND ");
-    }
-
-    //검색유형
-    switch (filterCondition.getSearchType()){
-      case "TC":  //제목 + 내용
-        sb.append("    (  BH_TITLE    like '%"+ filterCondition.getKeyword()+"%' ");
-        sb.append("    or BH_CONTENT like '%"+ filterCondition.getKeyword()+"%' )");
-        break;
-      case "T":   //제목
-        sb.append("       BH_TITLE    like '%"+ filterCondition.getKeyword()+"%' ");
-        break;
-      case "C":   //내용
-        sb.append("       BH_CONTENT like '%"+ filterCondition.getKeyword()+"%' ");
-        break;
-      default:
-    }
-    return sb;
-  }
+//    //검색유형
+//    switch (filterCondition.getSearchType()){
+//      case "TC":  //제목 + 내용
+//        sb.append("    (  BH_TITLE    like '%"+ filterCondition.getKeyword()+"%' ");
+//        sb.append("    or BH_CONTENT like '%"+ filterCondition.getKeyword()+"%' )");
+//        break;
+//      case "T":   //제목
+//        sb.append("       BH_TITLE    like '%"+ filterCondition.getKeyword()+"%' ");
+//        break;
+//      case "C":   //내용
+//        sb.append("       BH_CONTENT like '%"+ filterCondition.getKeyword()+"%' ");
+//        break;
+//      default:
+//    }
+//    return sb;
+//  }
 }

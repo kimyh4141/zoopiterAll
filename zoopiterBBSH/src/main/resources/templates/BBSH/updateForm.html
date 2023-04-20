@@ -250,8 +250,7 @@
     <div class="alarm">
       <label for="ex_filename">
         <div class="pic">
-              <span class="material-symbols-outlined"> photo_camera </span
-              >사진첨부
+              <span class="material-symbols-outlined"> photo_camera </span>사진첨부
         </div>
       </label>
       <input
@@ -264,10 +263,16 @@
           type="file"
           id="ex_filename"
           class="upload-hidden"
-          th:field="*{imageFiles}"  name='' multiple
+          th:field="*{imageFiles}" multiple
       />
-<!--          th:field="*{imageFiles}"-->
-<!--          multiple-->
+<!--      <div th:each="file : ${imagedFiles}" class="view__img">-->
+<!--        <th:block th:if="${#strings.contains(file.ftype,'image')}">-->
+<!--          &lt;!&ndash;     파일명      &ndash;&gt;-->
+<!--          <p th:text="${file.upload_filename}" style="font-size: 14px; margin-right: 10px;"></p>-->
+<!--          <img th:src="@{|/attach/view/${file.uploadfileId}|}" th:width="30px" th:height="30px">-->
+<!--        </th:block>-->
+<!--        <i class="fa-solid fa-trash-can" th:data-rid="${file.uploadfileId}"></i>-->
+<!--      </div>-->
     </div>
     <div class="alarm-r"></div>
 
