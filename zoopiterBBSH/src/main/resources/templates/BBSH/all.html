@@ -357,8 +357,8 @@
       <div class="main-nick">
         <!-- 게시글 -->
         <th:block th:each="BBSH : ${bbshLists}">
-          <button type="button" id="btnFindAll" style="border : none"; th:onclick="|location.href='@{/BBSH/{tId}/detail(tId=${BBSH.tId})}'|">
-        <div class="post" >
+          <input type="text" id="bbshId" th:value="${BBSH.bbshId}" style="display:none;">
+        <div class="post"  th:onclick="|location.href='@{/BBSH/{id}/detail(id=*{BBSH.bbshId})}'|">
           <div class="info">
             <div class="pro">
               <div class="img">
@@ -367,26 +367,27 @@
               </div>
               <div class="name">
                 <div>작성자명</div>
-                <div id="clock" th:text="${BBSH.uDate}">
+                <div id="clock" th:text="${BBSH.bhUdate}">
 
                 </div>
               </div>
             </div>
             <div class="sub">
               <div class="num">
-                <div class="num-cnt" th:text="${BBSH.hit}">
-                  <div class="num-cnt" >조회수
-                    <span th:text="*{bhHit}"></span>
-                  </div>
+                <div class="num-cnt">
+                  조회수
+                    <span th:text="${BBSH.bhHit}"></span>
                 </div>
               </div>
-              <div class="tag" th:text="${BBSH.bcategory}"></div>
+              <div class="tag" th:text="${BBSH.petType}"></div>
             </div>
           </div>
           <div class="preview">
             <div class="img">
-              <!-- <img src="" style="max-width: 100%; height: auto" /> -->
-              <!-- 기본이미지 -->
+<!--              &lt;!&ndash; 첨부된 이미지가 있는 경우  &ndash;&gt;-->
+<!--              <img th:if="${#maps.containsKey(imagedFileMap, BBSH.bbshId)}" th:src="@{|/attach/view/${imagedFileMap[BBSH.bbshId]}|}">-->
+<!--              &lt;!&ndash; 기본이미지 &ndash;&gt;-->
+<!--              <i th:if="${not #maps.containsKey(imagedFileMap, BBSH.bbshId)}" class="fa-solid fa-shield-cat"></i>-->
               <i class="fa-solid fa-shield-cat"></i>
             </div>
 
@@ -394,14 +395,13 @@
               <div class="hos">슬기로운 동물병원</div>
               <div>
                   <div>
-                    <a href="" th:href="@{/BBSH/{bbshId}/detail(bbshId=${BBSH.tId})}"  th:text="${BBSH.title}"></a>
+                    <a href="" th:href="@{/BBSH/{bbshId}/detail(bbshId=${BBSH.bbshId})}"></a>
                   </div>
-                  <td th:text="${BBSH.bcontent}"></td>
+                  <td th:text="${BBSH.bhContent}"></td>
               </div>
             </div>
           </div>
         </div>
-          </button>
     </th:block>
 
         </th:block>

@@ -84,7 +84,7 @@ public class NoticeController {
 
     // 등록
     BBSH bbsh = new BBSH();
-//    bbsh.setBbshId(saveForm.getBbshId());
+    bbsh.setBbshId(saveForm.getBbshId());
     bbsh.setBhTitle(saveForm.getBhTitle());
     bbsh.setBhContent(saveForm.getBhContent());
     bbsh.setPetType(saveForm.getPetType());
@@ -336,15 +336,14 @@ public class NoticeController {
     List<ListForm> partOfList = new ArrayList<>();
     for (BBSH bbsh : bbshListsPaging) {
       ListForm listForm = new ListForm();
-//      BeanUtils.copyProperties(bbsh, listForm);
-      listForm.setTId(bbsh.getBbshId());
-      listForm.setBcategory(bbsh.getPetType());
-      listForm.setTitle(bbsh.getBhTitle());
-      listForm.setBcontent(bbsh.getBhContent());
-      listForm.setNickname(bbsh.getUserNick());
-      listForm.setCDate(bbsh.getCDate());
-      listForm.setUDate(bbsh.getBhUdate());
-      listForm.setHit(bbsh.getBhHit());
+      BeanUtils.copyProperties(bbsh, listForm);
+//      listForm.setBbshId(bbsh.getBbshId());
+//      listForm.setPetType(bbsh.getPetType());
+//      listForm.setBhContent(bbsh.getBhContent());
+//      listForm.setUserNick(bbsh.getUserNick());
+//      listForm.setBhCdate(bbsh.getBhCdate());
+//      listForm.setBhUdate(bbsh.getBhUdate());
+//      listForm.setBhHit(bbsh.getBhHit());
       partOfList.add(listForm);
     }
     log.info("partOfList={}", partOfList);

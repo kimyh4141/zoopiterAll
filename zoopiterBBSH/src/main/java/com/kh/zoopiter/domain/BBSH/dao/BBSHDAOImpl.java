@@ -4,6 +4,7 @@ package com.kh.zoopiter.domain.BBSH.dao;
 import com.kh.zoopiter.domain.entity.BBSH;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.*;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BBSHDAOImpl implements BBSHDAO {
 
+  @Autowired
   private  final NamedParameterJdbcTemplate template;
 
 
@@ -130,33 +132,6 @@ public class BBSHDAOImpl implements BBSHDAO {
     return list;
   }
 
-//  // 카테고리별 목록
-//  @Override
-//  public List<BBSH> findAll(String category) {
-//    StringBuffer sb = new StringBuffer();
-//    sb.append("select ");
-//    sb.append("       BH_TITLE ");
-//    sb.append("       BH_CONTENT ");
-//    sb.append("       PET_TYPE   ");
-//    sb.append("       BH_HIT  ");
-//    sb.append("       USER_NICK  ");
-//    sb.append("       BH_CDATE  ");
-//    sb.append("       BH_UDATE  ");
-//    sb.append("from ");
-//    sb.append(" BBSH  ");
-//    sb.append("where PET_TYPE = ? ");
-//    sb.append("Order by ");
-//    sb.append("  BH_CDATE DESC"); // 예시로 BH_CDATE 기준으로 내림차순 정렬
-//
-//
-//    List<BBSH> list = template.query(
-//        sb.toString(),
-//        BeanPropertyRowMapper.newInstance(BBSH.class)  // 레코드 컬럼과 자바객체 멤버필드가 동일한 이름일경우, camelcase지원
-//    );
-//
-//    return list;
-//  }
-
   @Override
   public List<BBSH> findAllPaging(int startRec, int endRec) {
     StringBuffer sb = new StringBuffer();
@@ -164,11 +139,13 @@ public class BBSHDAOImpl implements BBSHDAO {
     sb.append("from( ");
     sb.append("    SELECT ");
     sb.append("    rownum no, ");
+    sb.append("       BBSH_ID, ");
     sb.append("       BH_TITLE, ");
     sb.append("       BH_CONTENT, ");
     sb.append("       PET_TYPE,   ");
     sb.append("       BH_HIT,  ");
     sb.append("       USER_NICK,  ");
+    sb.append("       BH_CDATE  ");
     sb.append("       BH_UDATE  ");
     sb.append("    FROM BBSH order by BBSH_ID DESC) t1 ");
     sb.append("where no between :startRec and :endRec ");
@@ -187,8 +164,7 @@ public class BBSHDAOImpl implements BBSHDAO {
     StringBuffer sb = new StringBuffer();
     sb.append("select t1.* ");
     sb.append("from( ");
-    sb.append("    select ");
-    sb.append("    ROW_NUMBER() OVER (ORDER BY PET_TYPE DESC , step ASC) no, ");
+    sb.append("   SELECT ROW_NUMBER()OVER(ORDER BY BH_UDATE DESC)no, ");
     sb.append("       BBSH_ID, ");
     sb.append("       BH_TITLE, ");
     sb.append("       BH_CONTENT, ");
@@ -219,11 +195,12 @@ public class BBSHDAOImpl implements BBSHDAO {
 
     List<BBSH> list = null;
 
-    list =template.query(sql.toString(), new BeanPropertyRowMapper<>(BBSH.class));
-
+    list = template.query(sql.toString(), new BeanPropertyRowMapper<>(BBSH.class));
 
     return list;
   }
+
+
 
   /**
    * 필터 검색
@@ -244,23 +221,6 @@ public class BBSHDAOImpl implements BBSHDAO {
     return list;
   }
 
-
-//
-//  //수동 매핑
-//  private RowMapper<BBSH> bbshRowMapper() {
-//    return (rs, rowNum) -> {
-//      BBSH bbsh = new BBSH();
-//      bbsh.setBbshId(rs.getLong("bbshId"));
-//      bbsh.setBhTitle(rs.getString("bhTitle"));
-//      bbsh.setBhContent(rs.getString("bhContent"));
-//      bbsh.setPetType(rs.getString("petType"));
-//      bbsh.setBhHname(rs.getString("bhHname"));
-//      bbsh.setBhHit(rs.getLong("bhHit"));
-////      bbsh.setBhCdate(rs.getTimestamp("bhCdate").getTime());
-////      bbsh.setBhUdate(rs.getTimestamp("bhUdate").getTime());
-//      return bbsh;
-//    };
-//  }
 
   //  조회수증가
   @Override
@@ -289,15 +249,6 @@ public class BBSHDAOImpl implements BBSHDAO {
     return cnt;
   }
 
-//  @Override
-//  public int totalCount(String bcategory) {
-//    String sql = "select count(*) from trouble_board where t_category = :tcategory";
-//    MapSqlParameterSource params = new MapSqlParameterSource();
-//    params.addValue("tcategory", bcategory);
-//    Integer cnt = template.queryForObject(sql, params, Integer.class);
-//
-//    return cnt;
-//  }
 
   @Override
   public int totalCount(BBSHFilter filterCondition) {

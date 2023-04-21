@@ -4,14 +4,12 @@ import lombok.Data;
 
 @Data
 public class ListForm {
-  private Long tId;
-  private String bcategory;
-  private String title;
-//  private String email;
-  private String bcontent;
-  private String nickname;
-  private String cDate;
-  private String uDate;
-  private Long hit;
-//  private int bindent;
+  private Long bbshId;
+  private String petType;
+  private String bhContent;
+  private String userNick;
+  private String bhCdate;
+  private String bhHname;
+  private String bhUdate;
+  private Long bhHit;
 }

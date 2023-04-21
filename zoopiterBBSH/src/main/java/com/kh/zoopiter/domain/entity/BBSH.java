@@ -22,11 +22,5 @@ public class BBSH  {
   private String bhUdate;  // 수정일
   private String sort;     // 추가된 필드
 
-  private Long ptroubleId;
-  private Long bGroup;
-  private Long step;
-  private Long bindent;
-  private String status;
-  private String cDate;
-  private Long uDate;
+
 }

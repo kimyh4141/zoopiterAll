@@ -1146,11 +1146,12 @@ DESC PET_NOTE;
 --게시판: 병원후기
 ------------
 CREATE TABLE BBSH(
-  BBSH_ID            NUMBER,          --게시글 번호(순번)
+  BBSH_ID            NUMBER default 0,--게시글 번호(순번)
   BH_TITLE           varchar2(150),   --글 제목
   BH_CONTENT         clob,            --글 내용
   PET_TYPE           varchar2(20),    --반려동물 품종
   BH_ATTACH          BLOB,            --첨부파일
+  BH_STAR            NUMBER,          -- 별점
   BH_HNAME           VARCHAR2(52),    --병원이름
   BH_HIT             NUMBER default 0,--조회수
   BH_GUBUN           VARCHAR2(15) default 'B0101',      --게시판 구분(병원후기: B0101, 커뮤니티: B0102)

@@ -12,11 +12,11 @@ public class BBSHFilter {
   private int startRec;         //시작레코드번호
   private int endRec;           //종료레코드번호
   private String searchType;    //검색유형
-//  private String keyword;       //검색어
+  private String keyword;       //검색어
 
-  public BBSHFilter(String[] category , String searchType) {
+  public BBSHFilter(String[] category , String searchType, String keyword) {
     this.category = category;
     this.searchType = searchType;
-//    this.keyword = keyword;
+    this.keyword = keyword;
   }
 }
